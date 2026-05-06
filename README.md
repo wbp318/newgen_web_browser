@@ -2,7 +2,27 @@
 
 A modern web browser dressed in classic Netscape-era chrome.
 
-Built on Electron — full Chromium rendering under the hood, hand-styled UI inspired by the late-90s desktop: Win95 beveled buttons, Tahoma at 11px with anti-aliasing off, an animated starfield throbber, a blinking-marquee home page, the works.
+**Built on Chromium** — the same rendering engine that powers Google Chrome, Microsoft Edge, Brave, and Opera. You get current-day web compatibility, JavaScript, modern CSS, video, audio, WebGL, the works. The only thing that's vintage is the chrome around it: Win95 beveled buttons, Tahoma at 11px with anti-aliasing off, an animated starfield throbber, a blinking-marquee home page.
+
+> **Trademark note.** Chromium and Chrome are trademarks of Google LLC. Newgen Navigator is not affiliated with, endorsed by, or sponsored by Google. The browser uses Chromium descriptively as its rendering engine, embedded via [Electron](https://www.electronjs.org/).
+
+## Download
+
+Prebuilt installers for Windows, macOS, and Linux are published on the [Releases page](https://github.com/wbp318/newgen_web_browser/releases).
+
+| Platform | File |
+| --- | --- |
+| Windows (installer) | `Newgen-Navigator-Setup-<version>.exe` |
+| Windows (portable)  | `Newgen-Navigator-<version>-portable.exe` |
+| macOS (Intel + Apple Silicon) | `Newgen-Navigator-<version>.dmg` |
+| Linux (universal)   | `Newgen-Navigator-<version>.AppImage` |
+| Linux (Debian/Ubuntu) | `newgen-navigator_<version>_amd64.deb` |
+
+Builds are currently unsigned. On first launch:
+
+- **Windows** SmartScreen will warn — click *More info* → *Run anyway*.
+- **macOS** Gatekeeper will block — right-click the app → *Open* → *Open*.
+- **Linux** AppImage: `chmod +x` the file, then run.
 
 ## Features
 
@@ -14,23 +34,37 @@ Built on Electron — full Chromium rendering under the hood, hand-styled UI ins
 - **History** — auto-recorded with timestamps; full panel + recent-items dropdown
 - **Find in page** (Ctrl+F) with previous/next and match counter
 - **Zoom** (Ctrl+/-/0) per tab; **hard reload** (Ctrl+Shift+R) bypasses cache
-- **Developer tools** (F12)
+- **Developer tools** (F12) — full Chromium DevTools
 - **Right-click context menus** — Open in New Tab, Save Image, View Source, Inspect Element, search selection on the web
 - **Custom retro home page** with scrolling marquee, neon panels, and a totally-legit visitor counter
 
-## Stack
-
-- **Electron** with `webview` tag for tab content
-- **No build step** — vanilla HTML / CSS / JS in the renderer
-- **`localStorage`** for bookmarks, history, and session
-- **Zero runtime dependencies** beyond Electron itself
-
-## Getting started
+## Build from source
 
 ```bash
+git clone https://github.com/wbp318/newgen_web_browser.git
+cd newgen_web_browser
 npm install
-npm start
+npm start                # run in dev
 ```
+
+Producing distributable installers:
+
+```bash
+npm run dist             # current platform
+npm run dist:win         # Windows NSIS + portable
+npm run dist:mac         # macOS DMG (x64 + arm64)
+npm run dist:linux       # AppImage + .deb
+```
+
+Output lands in `dist/`. Icons are regenerated from `assets/icon.svg` automatically on every build (`predist` hook → `tools/build-icons.js`).
+
+## Stack
+
+- **Electron 33** with `<webview>` for tab content (Chromium under the hood)
+- **No build step** in the renderer — vanilla HTML / CSS / JS
+- **`localStorage`** for bookmarks, history, and session
+- **Zero runtime dependencies** beyond Electron itself
+- **electron-builder** for cross-platform installers
 
 ## Keyboard shortcuts
 
@@ -60,25 +94,33 @@ npm start
 
 ```
 newgen_web_browser/
-├── main.js          # Electron main — window, context menus, popup routing
-├── preload.js       # Renderer ↔ main IPC bridge
-├── index.html       # Browser chrome
-├── styles.css       # Period-correct Win95 chrome aesthetic
-├── renderer.js      # Tab manager, bookmarks, history, find, menus
-├── home.html        # Retro home page loaded by new tabs
-└── package.json
+├── main.js                      # Electron main — window, context menus, popup routing
+├── preload.js                   # Renderer ↔ main IPC bridge
+├── index.html                   # Browser chrome
+├── styles.css                   # Period-correct Win95 chrome aesthetic
+├── renderer.js                  # Tab manager, bookmarks, history, find, menus
+├── home.html                    # Retro home page loaded by new tabs
+├── assets/icon.svg              # Source-of-truth app icon
+├── tools/build-icons.js         # SVG -> .png/.ico/.icns rasterizer
+├── .github/workflows/release.yml# CI build + GitHub Releases on tag
+└── package.json                 # electron-builder config lives here
 ```
 
 ## Roadmap
 
+- Win95-styled internal home page at `newgen://home` that ships with the app (replaces local `home.html` for new tabs)
+- Manifest V2 unpacked-extension loading with a beveled `Extensions...` manager dialog
 - Downloads bar with progress
 - Settings panel (homepage, search engine, default zoom)
 - Incognito mode (separate session partition)
 - Reader mode
 - Tab drag-to-reorder, drag-out to detach
-- Session restore on relaunch
-- Retro "About" dialog with custom modal styling
+- Code-signed Windows installer + notarized macOS DMG
 
-## A note on Netscape
+## Contributing
 
-Netscape Navigator was discontinued in 2008. The trademarks ("Netscape", "Navigator", the N-with-comet logo) are still held by Verizon. Newgen Navigator borrows the *look and feel* of the era — beveled gray chrome, the "Location:" tab, the throbber-style loading indicator — but uses original artwork and an original name. No Netscape logo, branding, or assets are reproduced.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the workflow, architecture map, and the **aesthetic constraint** (no rounded corners, no soft shadows, no smooth fonts on chrome — the whole point of the project is period-correct Win95 chrome).
+
+## License
+
+[MIT](LICENSE) — see also [`NOTICE`](NOTICE) for Chromium / Electron / Node.js attribution.

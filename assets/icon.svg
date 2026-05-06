@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" shape-rendering="crispEdges">
+  <!-- Outer Win95 raised plate -->
+  <rect width="256" height="256" fill="#c0c0c0"/>
+  <path d="M0,0 H256 L254,2 H2 V254 L0,256 Z" fill="#ffffff"/>
+  <path d="M256,0 V256 H0 L2,254 H254 V2 Z" fill="#000000"/>
+
+  <!-- Inset CRT bezel (dark top/left, light bottom/right = sunken) -->
+  <rect x="14" y="14" width="228" height="228" fill="#c0c0c0"/>
+  <path d="M14,14 H242 L240,16 H16 V240 L14,242 Z" fill="#7e7e7e"/>
+  <path d="M242,14 V242 H14 L16,240 H240 V16 Z" fill="#ffffff"/>
+
+  <!-- Navy CRT screen -->
+  <rect x="30" y="30" width="196" height="196" fill="#000080"/>
+  <rect x="30" y="30" width="196" height="196" fill="none" stroke="#000040" stroke-width="2"/>
+
+  <!-- Chunky yellow "NN" rendered as paths so rasterization is font-independent -->
+  <g fill="#ffff00">
+    <!-- First N -->
+    <rect x="53" y="70" width="18" height="110"/>
+    <rect x="105" y="70" width="18" height="110"/>
+    <polygon points="53,70 71,70 123,180 105,180"/>
+    <!-- Second N -->
+    <rect x="133" y="70" width="18" height="110"/>
+    <rect x="185" y="70" width="18" height="110"/>
+    <polygon points="133,70 151,70 203,180 185,180"/>
+  </g>
+</svg>

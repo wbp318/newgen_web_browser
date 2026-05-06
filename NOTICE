@@ -1,0 +1,21 @@
+Newgen Navigator
+Copyright (c) 2026 Newgen Navigator contributors
+Licensed under the MIT License (see LICENSE).
+
+This product includes software developed by third parties:
+
+- Electron (https://www.electronjs.org/) — MIT License.
+  Copyright (c) Electron contributors and Copyright (c) 2013-2020 GitHub Inc.
+
+- The Chromium project (https://www.chromium.org/) — BSD-style license.
+  Copyright 2015 The Chromium Authors. All rights reserved.
+  Newgen Navigator embeds Chromium via Electron and provides a Chromium-based
+  web rendering engine. Chromium and Chrome are trademarks of Google LLC; this
+  project is not affiliated with, endorsed by, or sponsored by Google.
+
+- Node.js (https://nodejs.org/) — MIT License.
+
+Trademark notice: "Netscape" and "Navigator" (with the N-with-comet logo) are
+trademarks held by Verizon Communications. Newgen Navigator borrows the visual
+language of late-1990s desktop browsers but does not reproduce, redistribute,
+or imply endorsement by those trademark holders.
