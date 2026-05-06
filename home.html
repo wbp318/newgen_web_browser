@@ -81,6 +81,83 @@
       margin: 0 auto;
       padding: 24px 24px 8px;
     }
+
+    /* ===== Win95 chrome dialog (the "Built on Chromium" hero panel) ===== */
+    .chromium-card {
+      font-family: Tahoma, "MS Sans Serif", Geneva, sans-serif;
+      -webkit-font-smoothing: none;
+      font-smooth: never;
+      font-size: 11px;
+      color: #000;
+      background: #c0c0c0;
+      border-top: 2px solid #ffffff;
+      border-left: 2px solid #ffffff;
+      border-right: 2px solid #000000;
+      border-bottom: 2px solid #000000;
+      box-shadow:
+        inset -1px -1px 0 #7e7e7e,
+        inset 1px 1px 0 #dfdfdf,
+        4px 4px 0 rgba(0,0,0,0.4);
+      margin-bottom: 24px;
+    }
+    .chromium-card .titlebar {
+      background: linear-gradient(90deg, #000080, #1084d0);
+      color: #fff;
+      font-weight: bold;
+      padding: 3px 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chromium-card .titlebar .glyph {
+      width: 14px; height: 14px;
+      background: #c0c0c0;
+      border-top: 1px solid #fff; border-left: 1px solid #fff;
+      border-right: 1px solid #000; border-bottom: 1px solid #000;
+      display: inline-block;
+      text-align: center;
+      line-height: 12px;
+      color: #000080;
+      font-weight: bold;
+    }
+    .chromium-card .body {
+      padding: 14px 16px 12px;
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 12px 14px;
+    }
+    .chromium-card .icon {
+      width: 56px; height: 56px;
+      background: #000080;
+      border-top: 2px solid #7e7e7e; border-left: 2px solid #7e7e7e;
+      border-right: 2px solid #fff; border-bottom: 2px solid #fff;
+      color: #ffff00;
+      font-family: Tahoma, sans-serif;
+      font-weight: 900;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: -3px;
+    }
+    .chromium-card .lede {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .chromium-card .lede strong { color: #000080; }
+    .chromium-card .stats {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      padding: 6px 8px;
+      background: #fff;
+      border-top: 1px solid #7e7e7e; border-left: 1px solid #7e7e7e;
+      border-right: 1px solid #dfdfdf; border-bottom: 1px solid #dfdfdf;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      color: #000;
+    }
+    .chromium-card .stats span { color: #000080; font-weight: bold; }
+
     .search-box {
       background: linear-gradient(180deg, #000060, #000030);
       border: 3px ridge #6666ff;
@@ -191,9 +268,31 @@
   </div>
 
   <div class="container">
+
+    <div class="chromium-card" role="region" aria-label="About this browser">
+      <div class="titlebar"><span class="glyph">N</span> About Newgen Navigator</div>
+      <div class="body">
+        <div class="icon">NN</div>
+        <div class="lede">
+          <strong>Built on Chromium</strong> &mdash; the same open-source engine that powers
+          Google Chrome, Microsoft Edge, Brave, and Opera. Every modern web standard
+          renders here exactly as it does there: JavaScript, CSS, video, audio, WebGL,
+          WebAssembly, the works. Full Chromium DevTools are wired up at <kbd>F12</kbd>.
+          <br><br>
+          The only thing that's vintage is the chrome around it.
+        </div>
+        <div class="stats">
+          chromium <span>{{CHROMIUM_VERSION}}</span> &nbsp;|&nbsp;
+          electron <span>{{ELECTRON_VERSION}}</span> &nbsp;|&nbsp;
+          node <span>{{NODE_VERSION}}</span> &nbsp;|&nbsp;
+          newgen <span>{{APP_VERSION}}</span>
+        </div>
+      </div>
+    </div>
+
     <div class="search-box">
       <label>SEARCH THE WORLD WIDE WEB</label>
-      <form action="https://www.google.com/search" method="get" target="_blank">
+      <form action="https://www.google.com/search" method="get">
         <input type="text" name="q" placeholder="Enter your query..." autofocus>
         <input type="submit" value="Search">
       </form>
@@ -203,24 +302,24 @@
       <div class="panel">
         <h2>★ What's Cool</h2>
         <ul>
-          <li><span class="bullet">»</span><a target="_blank" href="https://en.wikipedia.org">Wikipedia: The Free Encyclopedia</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://news.ycombinator.com">Hacker News</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://www.reddit.com">Reddit</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://github.com">GitHub</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://archive.org">The Internet Archive</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://theoldnet.com">The OldNet Browser</a></li>
+          <li><span class="bullet">»</span><a href="https://en.wikipedia.org">Wikipedia: The Free Encyclopedia</a></li>
+          <li><span class="bullet">»</span><a href="https://news.ycombinator.com">Hacker News</a></li>
+          <li><span class="bullet">»</span><a href="https://www.reddit.com">Reddit</a></li>
+          <li><span class="bullet">»</span><a href="https://github.com">GitHub</a></li>
+          <li><span class="bullet">»</span><a href="https://archive.org">The Internet Archive</a></li>
+          <li><span class="bullet">»</span><a href="https://theoldnet.com">The OldNet Browser</a></li>
         </ul>
       </div>
 
       <div class="panel">
         <h2>★ Net Directory</h2>
         <ul>
-          <li><span class="bullet">»</span><a target="_blank" href="https://duckduckgo.com">DuckDuckGo Search</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://www.google.com">Google</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://www.youtube.com">YouTube Multimedia</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://maps.google.com">Maps &amp; Directions</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://mail.proton.me">Electronic Mail</a></li>
-          <li><span class="bullet">»</span><a target="_blank" href="https://www.weather.gov">Weather Forecast</a></li>
+          <li><span class="bullet">»</span><a href="https://duckduckgo.com">DuckDuckGo Search</a></li>
+          <li><span class="bullet">»</span><a href="https://www.google.com">Google</a></li>
+          <li><span class="bullet">»</span><a href="https://www.youtube.com">YouTube Multimedia</a></li>
+          <li><span class="bullet">»</span><a href="https://maps.google.com">Maps &amp; Directions</a></li>
+          <li><span class="bullet">»</span><a href="https://mail.proton.me">Electronic Mail</a></li>
+          <li><span class="bullet">»</span><a href="https://www.weather.gov">Weather Forecast</a></li>
         </ul>
       </div>
     </div>
@@ -228,7 +327,7 @@
 
   <div class="footer">
     <span class="blink">●</span>
-    Newgen Navigator v0.1 — crafted with care
+    Newgen Navigator v{{APP_VERSION}} &mdash; crafted with care
     <span class="blink">●</span>
     <br><br>
     visitors: <span class="visitor-counter">00000042</span>

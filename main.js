@@ -1,8 +1,31 @@
-const { app, BrowserWindow, shell, Menu, clipboard, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, Menu, clipboard, ipcMain, protocol, session } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const https = require('https');
 
 let mainWindow = null;
+
+// `newgen://` is the browser's internal scheme for built-in pages (newgen://home, etc).
+// Must be registered before app.whenReady() to opt the scheme into standard-URL,
+// secure-context, and fetch-API privileges expected by web content.
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'newgen', privileges: { standard: true, secure: true, supportFetchAPI: true } },
+]);
+
+const NEWGEN_PAGES = {
+  home: 'home.html',
+};
+
+function renderInternalPage(slug) {
+  const file = NEWGEN_PAGES[slug];
+  if (!file) return null;
+  const html = fs.readFileSync(path.join(__dirname, file), 'utf8');
+  return html
+    .replace(/{{CHROMIUM_VERSION}}/g, process.versions.chrome || '')
+    .replace(/{{ELECTRON_VERSION}}/g, process.versions.electron || '')
+    .replace(/{{NODE_VERSION}}/g, process.versions.node || '')
+    .replace(/{{APP_VERSION}}/g, app.getVersion());
+}
 
 function sendAction(name, ...args) {
   mainWindow?.webContents.send('action', name, ...args);
@@ -197,7 +220,23 @@ function buildContextMenu(contents, params) {
   return Menu.buildFromTemplate(items);
 }
 
+function newgenProtocolHandler(request) {
+  const url = new URL(request.url);
+  const slug = (url.hostname || '').toLowerCase();
+  const html = renderInternalPage(slug);
+  if (html === null) {
+    return new Response('Not Found', { status: 404, headers: { 'Content-Type': 'text/plain' } });
+  }
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
+
 app.whenReady().then(() => {
+  // Register the handler on the default session (for the chrome window) and on
+  // the webview partition session (for tabs). Custom protocols are per-session;
+  // registering only the default session leaves tabs without a handler.
+  protocol.handle('newgen', newgenProtocolHandler);
+  session.fromPartition('persist:newgen').protocol.handle('newgen', newgenProtocolHandler);
+
   ipcMain.handle('fetch-suggestions', (_e, q) => fetchSuggestions(q));
   Menu.setApplicationMenu(buildAppMenu());
   mainWindow = createWindow();

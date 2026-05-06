@@ -99,7 +99,7 @@ newgen_web_browser/
 ├── index.html                   # Browser chrome
 ├── styles.css                   # Period-correct Win95 chrome aesthetic
 ├── renderer.js                  # Tab manager, bookmarks, history, find, menus
-├── home.html                    # Retro home page loaded by new tabs
+├── home.html                    # Retro home page served at newgen://home
 ├── assets/icon.svg              # Source-of-truth app icon
 ├── tools/build-icons.js         # SVG -> .png/.ico/.icns rasterizer
 ├── .github/workflows/release.yml# CI build + GitHub Releases on tag
@@ -108,7 +108,6 @@ newgen_web_browser/
 
 ## Roadmap
 
-- Win95-styled internal home page at `newgen://home` that ships with the app (replaces local `home.html` for new tabs)
 - Manifest V2 unpacked-extension loading with a beveled `Extensions...` manager dialog
 - Downloads bar with progress
 - Settings panel (homepage, search engine, default zoom)

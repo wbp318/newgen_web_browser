@@ -31,7 +31,7 @@ const historyPanel   = $('history-panel');
 const bookmarkTab    = $('bookmark-tab');
 const omniboxEl      = $('omnibox-suggestions');
 
-const HOME_URL = new URL('home.html', location.href).toString();
+const HOME_URL = 'newgen://home/';
 const HISTORY_LIMIT = 500;
 const CLOSED_TABS_LIMIT = 20;
 

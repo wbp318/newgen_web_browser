@@ -15,7 +15,7 @@ There is no build step, no test suite, no linter. The renderer is vanilla HTML/C
 
 Three-process Electron split:
 
-- **`main.js`** — main process. Hosts the `BrowserWindow`, **owns all keyboard shortcuts** as Electron application-menu accelerators (the menu is hidden via `setMenuBarVisibility(false)` but accelerators still fire from anywhere), forwards menu/`window.open`/right-click events to the renderer over IPC, and serves omnibox suggestions by fetching `https://www.google.com/complete/search?client=firefox` over Node's `https`.
+- **`main.js`** — main process. Hosts the `BrowserWindow`, **owns all keyboard shortcuts** as Electron application-menu accelerators (the menu is hidden via `setMenuBarVisibility(false)` but accelerators still fire from anywhere), forwards menu/`window.open`/right-click events to the renderer over IPC, serves omnibox suggestions by fetching `https://www.google.com/complete/search?client=firefox` over Node's `https`, and **registers the `newgen://` custom scheme** that serves bundled internal pages (currently just `newgen://home` → `home.html`, with `{{CHROMIUM_VERSION}}` / `{{ELECTRON_VERSION}}` / `{{NODE_VERSION}}` / `{{APP_VERSION}}` template substitution).
 - **`preload.js`** — context-isolated bridge. Exposes `window.newgen` via `contextBridge`:
   - `onAction(cb)` — subscriber for the `action` IPC channel (main → renderer push: shortcut firings, popup-to-new-tab, view-source-from-context-menu, etc.)
   - `fetchSuggestions(q)` — `ipcRenderer.invoke('fetch-suggestions', q)` (renderer → main request/response, returns `string[]`).
@@ -73,3 +73,5 @@ The product is named **Newgen Navigator**. Don't reintroduce the Netscape name, 
 - `cache_util_win.cc(20)] Unable to move the cache: Access is denied` shows up when two Electron instances share the same userData dir. Make sure no stray instance is running before relaunching.
 - `<webview>` is technically deprecated in Electron in favor of `WebContentsView`. We use webview because it lets the renderer own tab-switching state. If migrating, the `tabs` module is where all the coupling lives.
 - Default search engine is Google; it's a plain query URL (`https://www.google.com/search?q=`) — no API key needed. The suggestions endpoint (`/complete/search?client=firefox`) is also unauthenticated and returns clean JSON `["query", ["sugg1", "sugg2", ...]]`.
+- The `newgen://` scheme is registered as **standard + secure + supportFetchAPI** before `app.whenReady()`, then handled inside `app.whenReady()` via `protocol.handle()`. Adding a new internal page (e.g. `newgen://about`) is a one-liner: register the slug in `NEWGEN_PAGES` and drop the corresponding HTML file at the project root.
+- New tabs open `newgen://home/` (the trailing slash matters — Electron normalises the URL that way and `renderer.js` does exact-string comparisons against `HOME_URL`).
