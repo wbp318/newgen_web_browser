@@ -29,9 +29,11 @@ const ddHistory     = $('dd-history-list');
 const bookmarksPanel = $('bookmarks-panel');
 const historyPanel   = $('history-panel');
 const bookmarkTab    = $('bookmark-tab');
+const omniboxEl      = $('omnibox-suggestions');
 
 const HOME_URL = new URL('home.html', location.href).toString();
 const HISTORY_LIMIT = 500;
+const CLOSED_TABS_LIMIT = 20;
 
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -82,6 +84,15 @@ const history = {
   clear() { this.items = []; persist('history', this.items); renderHistory(); },
 };
 
+/* ===== Closed tabs stack ===== */
+const closedTabs = [];
+function recordClosed(tab) {
+  if (!tab || !tab.url) return;
+  if (/^(view-source:|about:|data:)/i.test(tab.url)) return;
+  closedTabs.push({ url: tab.url, title: tab.title });
+  if (closedTabs.length > CLOSED_TABS_LIMIT) closedTabs.shift();
+}
+
 /* ===== URL helpers ===== */
 const looksLikeUrl = (s) =>
   /^[\w-]+(\.[\w-]+)+([:/?#].*)?$/.test(s) || /^localhost(:\d+)?/i.test(s);
@@ -95,7 +106,7 @@ function navigate(input) {
   } else if (!/^https?:\/\//i.test(url)) {
     url = looksLikeUrl(url)
       ? 'https://' + url
-      : 'https://duckduckgo.com/?q=' + encodeURIComponent(url);
+      : 'https://www.google.com/search?q=' + encodeURIComponent(url);
   }
   const t = tabs.current();
   if (t) t.webview.loadURL(url);
@@ -106,6 +117,7 @@ const tabs = {
   list: [],
   activeId: null,
   nextId: 1,
+  _restoring: false,
 
   create(url, focus = true) {
     const id = this.nextId++;
@@ -117,6 +129,7 @@ const tabs = {
     const tab = {
       id, title: 'New Tab',
       url: url || HOME_URL,
+      favicon: null,
       webview: wv,
       isLoading: false,
     };
@@ -125,6 +138,7 @@ const tabs = {
     wv.src = tab.url;
     if (focus) this.switchTo(id);
     else this._renderStrip();
+    if (!this._restoring) this._persistSession();
     return tab;
   },
 
@@ -132,6 +146,7 @@ const tabs = {
     const idx = this.list.findIndex(t => t.id === id);
     if (idx === -1) return;
     const tab = this.list[idx];
+    recordClosed(tab);
     tab.webview.remove();
     this.list.splice(idx, 1);
     if (this.list.length === 0) {
@@ -144,6 +159,7 @@ const tabs = {
     } else {
       this._renderStrip();
     }
+    this._persistSession();
   },
 
   switchTo(id) {
@@ -166,6 +182,11 @@ const tabs = {
     const i = this.list.findIndex(t => t.id === this.activeId);
     if (i === -1) return;
     this.switchTo(this.list[(i - 1 + this.list.length) % this.list.length].id);
+  },
+
+  _persistSession() {
+    const urls = this.list.map(t => t.url).filter(Boolean);
+    persist('lastTabs', urls);
   },
 
   _wireWebview(tab) {
@@ -197,9 +218,11 @@ const tabs = {
 
     wv.addEventListener('did-navigate', (e) => {
       tab.url = e.url;
+      tab.favicon = null;
       history.add(e.url, tab.title);
+      this._persistSession();
       if (isActive()) {
-        urlInput.value = e.url;
+        urlInput.value = e.url === HOME_URL ? '' : e.url;
         updateLock(e.url);
         updateNavButtons();
         updateBookmarkButton();
@@ -208,6 +231,7 @@ const tabs = {
 
     wv.addEventListener('did-navigate-in-page', (e) => {
       tab.url = e.url;
+      this._persistSession();
       if (isActive()) {
         urlInput.value = e.url;
         updateLock(e.url);
@@ -226,6 +250,11 @@ const tabs = {
       if (isActive()) {
         document.title = (e.title ? e.title + ' - ' : '') + 'Newgen Navigator';
       }
+    });
+
+    wv.addEventListener('page-favicon-updated', (e) => {
+      tab.favicon = (e.favicons && e.favicons[0]) || null;
+      this._renderStrip();
     });
 
     wv.addEventListener('update-target-url', (e) => {
@@ -264,13 +293,27 @@ const tabs = {
       const el = document.createElement('div');
       el.className = 'tab' + (t.id === this.activeId ? ' active' : '');
       el.dataset.tabId = t.id;
-      const icon = t.isLoading ? '⌛' : (t.url === HOME_URL ? '★' : '🌐');
       const title = t.title || (t.url === HOME_URL ? 'Welcome' : 'New Tab');
       el.innerHTML = `
-        <span class="tab-favicon">${icon}</span>
+        <span class="tab-favicon"></span>
         <span class="tab-title">${escapeHtml(title)}</span>
         <button class="tab-close" title="Close">×</button>
       `;
+      const iconEl = el.querySelector('.tab-favicon');
+      if (t.isLoading) {
+        iconEl.textContent = '⌛';
+      } else if (t.favicon) {
+        const img = document.createElement('img');
+        img.className = 'favicon-img';
+        img.src = t.favicon;
+        img.alt = '';
+        img.addEventListener('error', () => {
+          iconEl.textContent = t.url === HOME_URL ? '★' : '🌐';
+        });
+        iconEl.appendChild(img);
+      } else {
+        iconEl.textContent = t.url === HOME_URL ? '★' : '🌐';
+      }
       el.addEventListener('mousedown', (e) => {
         if (e.target.classList.contains('tab-close')) return;
         if (e.button === 1) { e.preventDefault(); this.close(t.id); }
@@ -362,6 +405,163 @@ findInput.addEventListener('keydown', (e) => {
 findPrev.addEventListener('click', () => find.search(findInput.value, { forward: false, findNext: true }));
 findNext.addEventListener('click', () => find.search(findInput.value, { forward: true, findNext: true }));
 findClose.addEventListener('click', () => find.close());
+
+/* ===== Omnibox autocomplete ===== */
+const omnibox = {
+  items: [],
+  selected: -1,
+  fetchTimer: null,
+  reqId: 0,
+
+  position() {
+    const r = urlInput.getBoundingClientRect();
+    omniboxEl.style.left = r.left + 'px';
+    omniboxEl.style.top = r.bottom + 'px';
+    omniboxEl.style.width = Math.max(360, r.width) + 'px';
+  },
+
+  query(q) {
+    clearTimeout(this.fetchTimer);
+    if (!q || !q.trim()) return this.hide();
+    const my = ++this.reqId;
+    this.fetchTimer = setTimeout(() => this._build(q, my), 110);
+  },
+
+  showRecent() {
+    const items = [];
+    const seen = new Set();
+    for (const h of history.items.slice().reverse()) {
+      if (items.length >= 8) break;
+      if (seen.has(h.url) || /^file:/i.test(h.url)) continue;
+      seen.add(h.url);
+      items.push({ kind: 'history', text: h.title || h.url, displayUrl: h.url, url: h.url });
+    }
+    if (!items.length) return this.hide();
+    this.items = items;
+    this.selected = -1;
+    this.render();
+  },
+
+  async _build(q, reqId) {
+    const lc = q.toLowerCase();
+    const seen = new Set();
+    const items = [];
+
+    const isUrl = looksLikeUrl(q.trim()) || /^https?:\/\//i.test(q);
+    items.push(isUrl
+      ? { kind: 'url', text: q.trim(), url: /^https?:\/\//i.test(q) ? q : 'https://' + q }
+      : { kind: 'search', text: `Search Google for "${q}"`, url: 'https://www.google.com/search?q=' + encodeURIComponent(q) }
+    );
+
+    for (const b of bookmarks.items) {
+      if (items.length >= 4) break;
+      const t = (b.title || '').toLowerCase();
+      const u = (b.url || '').toLowerCase();
+      if ((t.includes(lc) || u.includes(lc)) && !seen.has(b.url)) {
+        seen.add(b.url);
+        items.push({ kind: 'bookmark', text: b.title || b.url, displayUrl: b.url, url: b.url });
+      }
+    }
+
+    for (const h of history.items.slice().reverse()) {
+      if (items.length >= 5) break;
+      const t = (h.title || '').toLowerCase();
+      const u = (h.url || '').toLowerCase();
+      if ((t.includes(lc) || u.includes(lc)) && !seen.has(h.url)) {
+        seen.add(h.url);
+        items.push({ kind: 'history', text: h.title || h.url, displayUrl: h.url, url: h.url });
+      }
+    }
+
+    let remote = [];
+    try { remote = await window.newgen.fetchSuggestions(q); } catch {}
+    if (reqId !== this.reqId) return;
+    for (const s of remote) {
+      if (items.length >= 9) break;
+      if (typeof s !== 'string' || !s.trim()) continue;
+      items.push({
+        kind: 'search',
+        text: s,
+        url: 'https://www.google.com/search?q=' + encodeURIComponent(s),
+      });
+    }
+
+    this.items = items;
+    this.selected = -1;
+    this.render();
+  },
+
+  render() {
+    if (!this.items.length) return this.hide();
+    omniboxEl.innerHTML = '';
+    const iconFor = (k) =>
+      k === 'bookmark' ? '★' :
+      k === 'history'  ? '🕐' :
+      k === 'url'      ? '🌐' : '🔍';
+    this.items.forEach((item, idx) => {
+      const el = document.createElement('div');
+      el.className = `sugg ${item.kind}` + (idx === this.selected ? ' selected' : '');
+      el.dataset.idx = idx;
+      const url = item.displayUrl ? `<span class="sugg-url">${escapeHtml(item.displayUrl)}</span>` : '';
+      el.innerHTML = `
+        <span class="sugg-icon">${iconFor(item.kind)}</span>
+        <span class="sugg-text">${escapeHtml(item.text)}</span>
+        ${url}
+      `;
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        this._navigate(item);
+      });
+      el.addEventListener('mouseenter', () => {
+        this.selected = idx;
+        this._updateSelection();
+      });
+      omniboxEl.appendChild(el);
+    });
+    this.position();
+    omniboxEl.hidden = false;
+  },
+
+  _updateSelection() {
+    omniboxEl.querySelectorAll('.sugg').forEach((el, i) => {
+      el.classList.toggle('selected', i === this.selected);
+    });
+  },
+
+  _navigate(item) {
+    this.hide();
+    if (item?.url) {
+      const t = tabs.current();
+      if (t) t.webview.loadURL(item.url);
+    }
+  },
+
+  next() {
+    if (!this.items.length) return;
+    this.selected = (this.selected + 1) % this.items.length;
+    this._updateSelection();
+  },
+  prev() {
+    if (!this.items.length) return;
+    this.selected = (this.selected - 1 + this.items.length) % this.items.length;
+    this._updateSelection();
+  },
+
+  apply() {
+    if (this.selected >= 0 && this.items[this.selected]) {
+      this._navigate(this.items[this.selected]);
+    } else {
+      navigate(urlInput.value);
+      this.hide();
+    }
+  },
+
+  hide() {
+    omniboxEl.hidden = true;
+    this.items = [];
+    this.selected = -1;
+  },
+};
 
 /* ===== Zoom ===== */
 function zoom(delta) {
@@ -477,7 +677,6 @@ document.querySelectorAll('.menu-item[data-menu]').forEach(item => {
   });
 });
 
-/* Close menus on outside click */
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.dropdown') && !e.target.closest('.menu-item[data-menu]')) {
     menus.hide();
@@ -513,7 +712,8 @@ document.querySelectorAll('.panel-close').forEach(btn => {
 /* ===== Action dispatcher ===== */
 const actions = {
   'new-tab':       () => tabs.create(HOME_URL),
-  'open-location': () => urlInput.focus(),
+  'reopen-tab':    () => { const last = closedTabs.pop(); if (last) tabs.create(last.url); },
+  'open-location': () => { urlInput.focus(); urlInput.select(); },
   'close-tab':     () => tabs.close(tabs.activeId),
   'print':         () => tabs.current()?.webview.print({}),
   'quit':          () => window.close(),
@@ -522,7 +722,10 @@ const actions = {
   'paste':         () => tabs.current()?.webview.paste(),
   'select-all':    () => tabs.current()?.webview.selectAll(),
   'find':          () => find.open(),
+  'find-next':     () => find.search(findInput.value, { forward: true,  findNext: true }),
+  'find-prev':     () => find.search(findInput.value, { forward: false, findNext: true }),
   'reload':        () => tabs.current()?.webview.reload(),
+  'hard-reload':   () => tabs.current()?.webview.reloadIgnoringCache(),
   'stop':          () => tabs.current()?.webview.stop(),
   'zoom-in':       () => zoom(0.5),
   'zoom-out':      () => zoom(-0.5),
@@ -562,61 +765,73 @@ bookmarkTab.addEventListener('click', () => {
   bookmarksPanel.hidden = !bookmarksPanel.hidden;
 });
 
+/* ===== URL input (with omnibox) ===== */
+urlInput.addEventListener('input', (e) => omnibox.query(e.target.value));
+urlInput.addEventListener('focus', () => {
+  urlInput.select();
+  if (!urlInput.value.trim()) omnibox.showRecent();
+});
+urlInput.addEventListener('blur', () => {
+  setTimeout(() => omnibox.hide(), 150);
+});
 urlInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') { e.preventDefault(); navigate(urlInput.value); }
-});
-urlInput.addEventListener('focus', () => urlInput.select());
-
-/* ===== Global keyboard shortcuts ===== */
-window.addEventListener('keydown', (e) => {
-  const ctrl = e.ctrlKey || e.metaKey;
-  const k = e.key.toLowerCase();
-
-  // Tabs
-  if (ctrl && k === 't')                           { e.preventDefault(); tabs.create(HOME_URL); }
-  else if (ctrl && k === 'w')                      { e.preventDefault(); tabs.close(tabs.activeId); }
-  else if (ctrl && e.key === 'Tab')                { e.preventDefault(); e.shiftKey ? tabs.prev() : tabs.next(); }
-  else if (ctrl && /^[1-9]$/.test(e.key)) {
+  if (e.key === 'Enter') {
     e.preventDefault();
-    const idx = parseInt(e.key, 10) - 1;
-    if (tabs.list[idx]) tabs.switchTo(tabs.list[idx].id);
-  }
-  // Navigation
-  else if (e.key === 'F5' || (ctrl && k === 'r'))  { e.preventDefault(); actions.reload(); }
-  else if (e.key === 'Escape') {
-    if (!findbar.hidden) find.close();
-    else { menus.hide(); actions.stop(); }
-  }
-  else if (e.altKey && e.key === 'ArrowLeft')      { e.preventDefault(); actions.back(); }
-  else if (e.altKey && e.key === 'ArrowRight')     { e.preventDefault(); actions.forward(); }
-  else if (ctrl && k === 'l')                      { e.preventDefault(); urlInput.focus(); }
-  else if (ctrl && k === 'p')                      { e.preventDefault(); actions.print(); }
-  // Find
-  else if (ctrl && k === 'f')                      { e.preventDefault(); find.open(); }
-  else if (e.key === 'F3' || (ctrl && k === 'g'))  {
+    omnibox.apply();
+  } else if (e.key === 'ArrowDown' && !omniboxEl.hidden) {
     e.preventDefault();
-    find.search(findInput.value, { forward: !e.shiftKey, findNext: true });
+    omnibox.next();
+  } else if (e.key === 'ArrowUp' && !omniboxEl.hidden) {
+    e.preventDefault();
+    omnibox.prev();
+  } else if (e.key === 'Escape') {
+    if (!omniboxEl.hidden) { e.preventDefault(); omnibox.hide(); }
   }
-  // Zoom
-  else if (ctrl && (e.key === '+' || e.key === '=')) { e.preventDefault(); zoom(0.5); }
-  else if (ctrl && e.key === '-')                  { e.preventDefault(); zoom(-0.5); }
-  else if (ctrl && e.key === '0')                  { e.preventDefault(); zoomReset(); }
-  // Bookmarks / history
-  else if (ctrl && k === 'd')                      { e.preventDefault(); actions['add-bookmark'](); }
-  else if (ctrl && k === 'b')                      { e.preventDefault(); bookmarksPanel.hidden = false; }
-  else if (ctrl && k === 'h')                      { e.preventDefault(); historyPanel.hidden = false; }
-  // Dev / source
-  else if (e.key === 'F12')                        { e.preventDefault(); actions['dev-tools'](); }
-  else if (ctrl && k === 'u')                      { e.preventDefault(); actions['view-source'](); }
 });
 
-/* ===== IPC from main (popups, context menu actions) ===== */
+window.addEventListener('resize', () => {
+  if (!omniboxEl.hidden) omnibox.position();
+});
+
+/* ===== IPC dispatcher (shortcuts and context-menu actions from main) ===== */
 if (window.newgen) {
-  window.newgen.onOpenInNewTab((url, focus) => tabs.create(url, focus));
-  window.newgen.onViewSource((url) => tabs.create('view-source:' + url));
+  window.newgen.onAction((name, ...args) => {
+    if (name === 'open-in-new-tab') {
+      const [url, focus] = args;
+      tabs.create(url, focus);
+      return;
+    }
+    if (name === 'view-source-url') {
+      const [url] = args;
+      tabs.create('view-source:' + url);
+      return;
+    }
+    if (name === 'switch-tab') {
+      const i = args[0];
+      if (tabs.list[i]) tabs.switchTo(tabs.list[i].id);
+      return;
+    }
+    if (name === 'stop-or-close-find') {
+      if (!omniboxEl.hidden) omnibox.hide();
+      else if (!findbar.hidden) find.close();
+      else actions.stop();
+      return;
+    }
+    actions[name]?.();
+  });
 }
 
-/* ===== Init ===== */
+/* ===== Init: render panels, then restore session or open home ===== */
 renderBookmarks();
 renderHistory();
-tabs.create(HOME_URL);
+{
+  const lastTabs = load('lastTabs', []);
+  if (Array.isArray(lastTabs) && lastTabs.length > 0) {
+    tabs._restoring = true;
+    lastTabs.forEach((url, i) => tabs.create(url, i === 0));
+    tabs._restoring = false;
+    tabs._persistSession();
+  } else {
+    tabs.create(HOME_URL);
+  }
+}

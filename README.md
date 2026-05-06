@@ -6,12 +6,14 @@ Built on Electron — full Chromium rendering under the hood, hand-styled UI ins
 
 ## Features
 
-- **Multiple tabs** with middle-click close, persistent session storage, and Ctrl+1..9 jump
+- **Multiple tabs** with middle-click close, persistent session storage, Ctrl+1..9 jump, real favicons, and reopen-closed-tab (Ctrl+Shift+T)
+- **Session restore** — closed-tab list is rebuilt on every launch
+- **Omnibox autocomplete** — bookmark/history hits plus live Google suggestions, arrow-key navigation, Chrome-style empty-focus recents
 - **Working menu bar** — File / Edit / View / Go / Bookmarks / History / Window / Help, with proper accelerators
 - **Bookmarks** — add, remove, navigate; persisted in local storage
 - **History** — auto-recorded with timestamps; full panel + recent-items dropdown
 - **Find in page** (Ctrl+F) with previous/next and match counter
-- **Zoom** (Ctrl+/-/0) per tab
+- **Zoom** (Ctrl+/-/0) per tab; **hard reload** (Ctrl+Shift+R) bypasses cache
 - **Developer tools** (F12)
 - **Right-click context menus** — Open in New Tab, Save Image, View Source, Inspect Element, search selection on the web
 - **Custom retro home page** with scrolling marquee, neon panels, and a totally-legit visitor counter
@@ -35,11 +37,13 @@ npm start
 | Action | Shortcut |
 | --- | --- |
 | New tab | Ctrl+T |
+| Reopen closed tab | Ctrl+Shift+T |
 | Close tab | Ctrl+W |
 | Next / previous tab | Ctrl+Tab / Ctrl+Shift+Tab |
 | Switch to tab N | Ctrl+1..9 |
 | Focus address bar | Ctrl+L |
 | Reload | F5 / Ctrl+R |
+| Hard reload (bypass cache) | Ctrl+Shift+R |
 | Stop | Esc |
 | Back / Forward | Alt+Left / Alt+Right |
 | Find in page | Ctrl+F |

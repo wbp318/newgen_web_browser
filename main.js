@@ -1,7 +1,118 @@
-const { app, BrowserWindow, shell, Menu, clipboard } = require('electron');
+const { app, BrowserWindow, shell, Menu, clipboard, ipcMain } = require('electron');
 const path = require('path');
+const https = require('https');
 
 let mainWindow = null;
+
+function sendAction(name, ...args) {
+  mainWindow?.webContents.send('action', name, ...args);
+}
+
+function fetchSuggestions(q) {
+  return new Promise((resolve) => {
+    const query = (q || '').trim();
+    if (!query) return resolve([]);
+    const url = `https://www.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
+    const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', (c) => body += c);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          resolve(Array.isArray(parsed?.[1]) ? parsed[1] : []);
+        } catch { resolve([]); }
+      });
+    });
+    req.on('error', () => resolve([]));
+    req.setTimeout(2500, () => { req.destroy(); resolve([]); });
+  });
+}
+
+function buildAppMenu() {
+  const switchTabItems = [];
+  for (let i = 1; i <= 9; i++) {
+    switchTabItems.push({
+      label: `Tab ${i}`,
+      accelerator: `CmdOrCtrl+${i}`,
+      click: () => sendAction('switch-tab', i - 1),
+    });
+  }
+
+  return Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [
+        { label: 'New Tab',           accelerator: 'CmdOrCtrl+T',       click: () => sendAction('new-tab') },
+        { label: 'Reopen Closed Tab', accelerator: 'CmdOrCtrl+Shift+T', click: () => sendAction('reopen-tab') },
+        { label: 'Close Tab',         accelerator: 'CmdOrCtrl+W',       click: () => sendAction('close-tab') },
+        { label: 'Open Location',     accelerator: 'CmdOrCtrl+L',       click: () => sendAction('open-location') },
+        { type: 'separator' },
+        { label: 'Print',             accelerator: 'CmdOrCtrl+P',       click: () => sendAction('print') },
+        { type: 'separator' },
+        { role: 'quit' },
+      ],
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' },
+        { type: 'separator' },
+        { label: 'Find',              accelerator: 'CmdOrCtrl+F',       click: () => sendAction('find') },
+        { label: 'Find Next',         accelerator: 'F3',                click: () => sendAction('find-next') },
+        { label: 'Find Previous',     accelerator: 'Shift+F3',          click: () => sendAction('find-prev') },
+        { label: 'Find Next (G)',     accelerator: 'CmdOrCtrl+G',       click: () => sendAction('find-next') },
+        { label: 'Find Previous (G)', accelerator: 'CmdOrCtrl+Shift+G', click: () => sendAction('find-prev') },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [
+        { label: 'Reload',            accelerator: 'F5',                click: () => sendAction('reload') },
+        { label: 'Reload (R)',        accelerator: 'CmdOrCtrl+R',       click: () => sendAction('reload') },
+        { label: 'Hard Reload',       accelerator: 'CmdOrCtrl+Shift+R', click: () => sendAction('hard-reload') },
+        { label: 'Stop',              accelerator: 'Escape',            click: () => sendAction('stop-or-close-find') },
+        { type: 'separator' },
+        { label: 'Zoom In',           accelerator: 'CmdOrCtrl+=',       click: () => sendAction('zoom-in') },
+        { label: 'Zoom In (Plus)',    accelerator: 'CmdOrCtrl+Plus',    click: () => sendAction('zoom-in') },
+        { label: 'Zoom Out',          accelerator: 'CmdOrCtrl+-',       click: () => sendAction('zoom-out') },
+        { label: 'Reset Zoom',        accelerator: 'CmdOrCtrl+0',       click: () => sendAction('zoom-reset') },
+        { type: 'separator' },
+        { label: 'View Source',       accelerator: 'CmdOrCtrl+U',       click: () => sendAction('view-source') },
+        { label: 'Developer Tools',   accelerator: 'F12',               click: () => sendAction('dev-tools') },
+      ],
+    },
+    {
+      label: 'Go',
+      submenu: [
+        { label: 'Back',    accelerator: 'Alt+Left',  click: () => sendAction('back') },
+        { label: 'Forward', accelerator: 'Alt+Right', click: () => sendAction('forward') },
+      ],
+    },
+    {
+      label: 'Bookmarks',
+      submenu: [
+        { label: 'Add Bookmark',   accelerator: 'CmdOrCtrl+D', click: () => sendAction('add-bookmark') },
+        { label: 'Show Bookmarks', accelerator: 'CmdOrCtrl+B', click: () => sendAction('show-bookmarks') },
+      ],
+    },
+    {
+      label: 'History',
+      submenu: [
+        { label: 'Show History', accelerator: 'CmdOrCtrl+H', click: () => sendAction('show-history') },
+      ],
+    },
+    {
+      label: 'Window',
+      submenu: [
+        { label: 'Next Tab',     accelerator: 'Ctrl+Tab',       click: () => sendAction('next-tab') },
+        { label: 'Previous Tab', accelerator: 'Ctrl+Shift+Tab', click: () => sendAction('prev-tab') },
+        { type: 'separator' },
+        ...switchTabItems,
+      ],
+    },
+  ]);
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -11,7 +122,6 @@ function createWindow() {
     minHeight: 500,
     title: 'Newgen Navigator',
     backgroundColor: '#c0c0c0',
-    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       webviewTag: true,
@@ -31,9 +141,9 @@ function buildContextMenu(contents, params) {
   if (params.linkURL) {
     items.push(
       { label: 'Open Link in New Tab',
-        click: () => mainWindow?.webContents.send('open-in-new-tab', params.linkURL, true) },
+        click: () => sendAction('open-in-new-tab', params.linkURL, true) },
       { label: 'Open Link in Background Tab',
-        click: () => mainWindow?.webContents.send('open-in-new-tab', params.linkURL, false) },
+        click: () => sendAction('open-in-new-tab', params.linkURL, false) },
       { label: 'Copy Link Address',
         click: () => clipboard.writeText(params.linkURL) },
       { type: 'separator' }
@@ -42,7 +152,7 @@ function buildContextMenu(contents, params) {
   if (params.hasImageContents && params.srcURL) {
     items.push(
       { label: 'Open Image in New Tab',
-        click: () => mainWindow?.webContents.send('open-in-new-tab', params.srcURL, true) },
+        click: () => sendAction('open-in-new-tab', params.srcURL, true) },
       { label: 'Save Image As...',
         click: () => contents.downloadURL(params.srcURL) },
       { label: 'Copy Image Address',
@@ -56,9 +166,9 @@ function buildContextMenu(contents, params) {
       : params.selectionText;
     items.push(
       { label: `Search the Web for "${snippet}"`,
-        click: () => mainWindow?.webContents.send(
+        click: () => sendAction(
           'open-in-new-tab',
-          'https://duckduckgo.com/?q=' + encodeURIComponent(params.selectionText),
+          'https://www.google.com/search?q=' + encodeURIComponent(params.selectionText),
           true) },
       { label: 'Copy', role: 'copy' },
       { type: 'separator' }
@@ -79,7 +189,7 @@ function buildContextMenu(contents, params) {
     { label: 'Reload', click: () => contents.reload() },
     { type: 'separator' },
     { label: 'View Page Source',
-      click: () => mainWindow?.webContents.send('view-source', contents.getURL()) },
+      click: () => sendAction('view-source-url', contents.getURL()) },
     { label: 'Inspect Element',
       click: () => contents.inspectElement(params.x, params.y) }
   );
@@ -88,6 +198,8 @@ function buildContextMenu(contents, params) {
 }
 
 app.whenReady().then(() => {
+  ipcMain.handle('fetch-suggestions', (_e, q) => fetchSuggestions(q));
+  Menu.setApplicationMenu(buildAppMenu());
   mainWindow = createWindow();
 });
 
@@ -95,7 +207,7 @@ app.on('web-contents-created', (_event, contents) => {
   contents.setWindowOpenHandler(({ url, disposition }) => {
     const inNewTab = ['foreground-tab', 'background-tab', 'new-window'].includes(disposition);
     if (inNewTab) {
-      mainWindow?.webContents.send('open-in-new-tab', url, disposition !== 'background-tab');
+      sendAction('open-in-new-tab', url, disposition !== 'background-tab');
       return { action: 'deny' };
     }
     shell.openExternal(url);

@@ -577,3 +577,60 @@ webview.active { display: inline-flex; flex: 1; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
   transition: width 0.18s linear;
 }
+
+/* Omnibox autocomplete ------------------------------------- */
+.omnibox-suggestions {
+  position: absolute;
+  background: #ffffff;
+  border: 2px solid;
+  border-color: var(--dk-shadow) var(--hl) var(--hl) var(--dk-shadow);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  z-index: 500;
+  font-family: inherit;
+  font-size: 11px;
+  max-height: 360px;
+  overflow-y: auto;
+  user-select: none;
+}
+.omnibox-suggestions[hidden] { display: none; }
+.sugg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  cursor: default;
+  border-bottom: 1px dotted #ddd;
+  white-space: nowrap;
+}
+.sugg:last-child { border-bottom: none; }
+.sugg.selected { background: var(--select-bg); color: var(--select-fg); }
+.sugg.selected .sugg-url { color: #aaccff; }
+.sugg-icon {
+  width: 16px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 12px;
+}
+.sugg-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+}
+.sugg.search .sugg-text { font-weight: normal; }
+.sugg-url {
+  color: #777;
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Real favicon images in tabs ------------------------------ */
+.tab-favicon img.favicon-img {
+  width: 14px;
+  height: 14px;
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
+}
