@@ -20,11 +20,16 @@ function renderInternalPage(slug) {
   const file = NEWGEN_PAGES[slug];
   if (!file) return null;
   const html = fs.readFileSync(path.join(__dirname, file), 'utf8');
-  return html
-    .replace(/{{CHROMIUM_VERSION}}/g, process.versions.chrome || '')
-    .replace(/{{ELECTRON_VERSION}}/g, process.versions.electron || '')
-    .replace(/{{NODE_VERSION}}/g, process.versions.node || '')
-    .replace(/{{APP_VERSION}}/g, app.getVersion());
+  const subs = {
+    '{{CHROMIUM_VERSION}}': process.versions.chrome || '',
+    '{{ELECTRON_VERSION}}': process.versions.electron || '',
+    '{{NODE_VERSION}}': process.versions.node || '',
+    '{{APP_VERSION}}': app.getVersion(),
+  };
+  return Object.entries(subs).reduce(
+    (out, [token, value]) => out.split(token).join(value),
+    html
+  );
 }
 
 function sendAction(name, ...args) {

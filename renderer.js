@@ -825,8 +825,19 @@ if (window.newgen) {
 renderBookmarks();
 renderHistory();
 {
-  const lastTabs = load('lastTabs', []);
-  if (Array.isArray(lastTabs) && lastTabs.length > 0) {
+  // Migrate stale file:///.../home.html session entries from before the
+  // newgen:// scheme; drop any other local-file URL since lastTabs should
+  // only ever be web URLs or our own internal scheme.
+  const migrate = (url) => {
+    if (typeof url !== 'string') return null;
+    if (/^file:\/\/.*\/home\.html(\?|#|$)/i.test(url)) return HOME_URL;
+    if (/^file:/i.test(url)) return null;
+    return url;
+  };
+  const lastTabs = load('lastTabs', [])
+    .map(migrate)
+    .filter(Boolean);
+  if (lastTabs.length > 0) {
     tabs._restoring = true;
     lastTabs.forEach((url, i) => tabs.create(url, i === 0));
     tabs._restoring = false;
