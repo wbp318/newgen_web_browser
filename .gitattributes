@@ -1,0 +1,238 @@
+# Auto-detect text files; normalize line endings on commit.
+* text=auto eol=lf
+
+# Windows-only scripts must keep CRLF.
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+# Binary assets
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.bmp   binary
+*.webp  binary
+*.tiff  binary
+*.pdf   binary
+*.psd   binary
+*.ai    binary
+*.zip   binary
+*.tar   binary
+*.tgz   binary
+*.gz    binary
+*.bz2   binary
+*.xz    binary
+*.7z    binary
+*.rar   binary
+*.exe   binary
+*.dll   binary
+*.so    binary
+*.dylib binary
+*.app   binary
+*.dmg   binary
+*.deb   binary
+*.rpm   binary
+*.msi   binary
+*.appx  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary
+*.mp3   binary
+*.mp4   binary
+*.m4a   binary
+*.m4v   binary
+*.webm  binary
+*.wav   binary
+*.flac  binary
+*.ogg   binary
+*.mov   binary
+*.avi   binary
+*.mkv   binary
+*.class binary
+*.jar   binary
+*.pyc   binary
+*.pyo   binary
+*.o     binary
+*.a     binary
+*.lib   binary
+*.obj   binary
+
+# ---------------------------------------------------------------
+# linguist hints — ensure GitHub language stats include everything,
+# especially Markdown (which linguist treats as documentation by default).
+# ---------------------------------------------------------------
+
+# Documentation that should still count toward language stats
+*.md       linguist-detectable=true linguist-documentation=false
+*.markdown linguist-detectable=true linguist-documentation=false
+*.mdx      linguist-detectable=true linguist-documentation=false
+*.rst      linguist-detectable=true linguist-documentation=false
+*.adoc     linguist-detectable=true linguist-documentation=false
+*.tex      linguist-detectable=true linguist-documentation=false
+*.org      linguist-detectable=true linguist-documentation=false
+
+# Web — markup, styles, scripts
+*.html     linguist-detectable=true
+*.htm      linguist-detectable=true
+*.xhtml    linguist-detectable=true
+*.css      linguist-detectable=true
+*.scss     linguist-detectable=true
+*.sass     linguist-detectable=true
+*.less     linguist-detectable=true
+*.styl     linguist-detectable=true
+*.js       linguist-detectable=true
+*.mjs      linguist-detectable=true
+*.cjs      linguist-detectable=true
+*.jsx      linguist-detectable=true
+*.ts       linguist-detectable=true
+*.tsx      linguist-detectable=true
+*.cts      linguist-detectable=true
+*.mts      linguist-detectable=true
+*.vue      linguist-detectable=true
+*.svelte   linguist-detectable=true
+*.astro    linguist-detectable=true
+*.liquid   linguist-detectable=true
+*.hbs      linguist-detectable=true
+*.ejs      linguist-detectable=true
+*.pug      linguist-detectable=true
+
+# Data / config
+*.json     linguist-detectable=true
+*.json5    linguist-detectable=true
+*.jsonc    linguist-detectable=true
+*.yaml     linguist-detectable=true
+*.yml      linguist-detectable=true
+*.toml     linguist-detectable=true
+*.xml      linguist-detectable=true
+*.ini      linguist-detectable=true
+*.conf     linguist-detectable=true
+*.csv      linguist-detectable=true
+*.tsv      linguist-detectable=true
+*.env      linguist-detectable=true
+
+# Backend — general purpose
+*.py       linguist-detectable=true
+*.pyi      linguist-detectable=true
+*.ipynb    linguist-detectable=true
+*.rb       linguist-detectable=true
+*.erb      linguist-detectable=true
+*.rake     linguist-detectable=true
+*.php      linguist-detectable=true
+*.phtml    linguist-detectable=true
+*.go       linguist-detectable=true
+*.rs       linguist-detectable=true
+*.java     linguist-detectable=true
+*.kt       linguist-detectable=true
+*.kts      linguist-detectable=true
+*.scala    linguist-detectable=true
+*.sc       linguist-detectable=true
+*.groovy   linguist-detectable=true
+*.gradle   linguist-detectable=true
+*.clj      linguist-detectable=true
+*.cljs     linguist-detectable=true
+*.cljc     linguist-detectable=true
+*.edn      linguist-detectable=true
+*.ex       linguist-detectable=true
+*.exs      linguist-detectable=true
+*.erl      linguist-detectable=true
+*.hrl      linguist-detectable=true
+*.elm      linguist-detectable=true
+*.hs       linguist-detectable=true
+*.lhs      linguist-detectable=true
+*.cabal    linguist-detectable=true
+*.ml       linguist-detectable=true
+*.mli      linguist-detectable=true
+*.fs       linguist-detectable=true
+*.fsi      linguist-detectable=true
+*.fsx      linguist-detectable=true
+*.dart     linguist-detectable=true
+*.cr       linguist-detectable=true
+*.jl       linguist-detectable=true
+
+# Systems / native
+*.c        linguist-detectable=true
+*.h        linguist-detectable=true
+*.cpp      linguist-detectable=true
+*.cc       linguist-detectable=true
+*.cxx      linguist-detectable=true
+*.c++      linguist-detectable=true
+*.hpp      linguist-detectable=true
+*.hh       linguist-detectable=true
+*.hxx      linguist-detectable=true
+*.h++      linguist-detectable=true
+*.m        linguist-detectable=true
+*.mm       linguist-detectable=true
+*.swift    linguist-detectable=true
+*.zig      linguist-detectable=true
+*.nim      linguist-detectable=true
+*.nims     linguist-detectable=true
+*.d        linguist-detectable=true
+*.v        linguist-detectable=true
+*.vala     linguist-detectable=true
+*.asm      linguist-detectable=true
+*.s        linguist-detectable=true
+*.S        linguist-detectable=true
+
+# Shell / scripting
+*.sh       linguist-detectable=true
+*.bash     linguist-detectable=true
+*.zsh      linguist-detectable=true
+*.fish     linguist-detectable=true
+*.ksh      linguist-detectable=true
+*.lua      linguist-detectable=true
+*.tcl      linguist-detectable=true
+*.pl       linguist-detectable=true
+*.pm       linguist-detectable=true
+*.r        linguist-detectable=true
+*.R        linguist-detectable=true
+*.awk      linguist-detectable=true
+*.sed      linguist-detectable=true
+
+# Databases / queries / IDLs
+*.sql      linguist-detectable=true
+*.psql     linguist-detectable=true
+*.plsql    linguist-detectable=true
+*.graphql  linguist-detectable=true
+*.gql      linguist-detectable=true
+*.proto    linguist-detectable=true
+*.thrift   linguist-detectable=true
+*.avsc     linguist-detectable=true
+
+# Infra / DevOps
+*.tf       linguist-detectable=true
+*.tfvars   linguist-detectable=true
+*.hcl      linguist-detectable=true
+*.bicep    linguist-detectable=true
+*.nix      linguist-detectable=true
+*.bzl      linguist-detectable=true
+Dockerfile         linguist-detectable=true
+*.dockerfile       linguist-detectable=true
+docker-compose.yml linguist-detectable=true
+Makefile           linguist-detectable=true
+GNUmakefile        linguist-detectable=true
+*.mk               linguist-detectable=true
+*.cmake            linguist-detectable=true
+CMakeLists.txt     linguist-detectable=true
+
+# Mark generated / vendored — exclude from language stats
+package-lock.json  linguist-generated=true
+yarn.lock          linguist-generated=true
+pnpm-lock.yaml     linguist-generated=true
+bun.lockb          linguist-generated=true binary
+poetry.lock        linguist-generated=true
+Pipfile.lock       linguist-generated=true
+Cargo.lock         linguist-generated=true
+composer.lock      linguist-generated=true
+Gemfile.lock       linguist-generated=true
+node_modules/**    linguist-vendored
+vendor/**          linguist-vendored
+dist/**            linguist-generated=true
+build/**           linguist-generated=true
+out/**             linguist-generated=true
+*.min.js           linguist-generated=true
+*.min.css          linguist-generated=true
+*.map              linguist-generated=true

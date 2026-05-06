@@ -1,0 +1,13 @@
+{
+  "name": "newgen-navigator",
+  "productName": "Newgen Navigator",
+  "version": "0.1.0",
+  "description": "A modern web browser dressed in classic Netscape-era chrome.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}

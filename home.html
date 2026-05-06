@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to Newgen Navigator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Times New Roman", Times, serif;
+      background: #000020;
+      color: #ccddff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .stars-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 60% 70%, #fff 50%, transparent 100%),
+        radial-gradient(2px 2px at 80% 20%, #ffd 50%, transparent 100%),
+        radial-gradient(1px 1px at 30% 80%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 90% 50%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 10% 60%, #fff 50%, transparent 100%),
+        radial-gradient(2px 2px at 50% 10%, #cdf 50%, transparent 100%),
+        radial-gradient(1px 1px at 75% 85%, #fff 50%, transparent 100%),
+        radial-gradient(2px 2px at 15% 90%, #fff 50%, transparent 100%);
+      animation: starpulse 3s ease-in-out infinite;
+    }
+    @keyframes starpulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    .header {
+      background: linear-gradient(180deg, #000040, #0010a0);
+      padding: 28px 32px 22px;
+      border-bottom: 4px ridge #6666ff;
+      text-align: center;
+    }
+    h1 {
+      font-family: "Comic Sans MS", "Times New Roman", serif;
+      font-size: 52px;
+      margin: 0;
+      color: #ffff00;
+      text-shadow: 3px 3px 0 #ff00ff, 6px 6px 0 #00ffff;
+      letter-spacing: 2px;
+    }
+    .subtitle {
+      font-style: italic;
+      color: #aaccff;
+      margin-top: 8px;
+      font-size: 18px;
+    }
+    .marquee {
+      background: #000;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      padding: 5px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      border-top: 2px solid #00ff00;
+      border-bottom: 2px solid #00ff00;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    .marquee-track {
+      display: inline-block;
+      animation: scroll 32s linear infinite;
+      padding-left: 100%;
+    }
+    @keyframes scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
+    }
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px 24px 8px;
+    }
+    .search-box {
+      background: linear-gradient(180deg, #000060, #000030);
+      border: 3px ridge #6666ff;
+      padding: 18px;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    .search-box label {
+      display: block;
+      color: #ffaa00;
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .search-box form { display: inline-block; }
+    .search-box input[type="text"] {
+      width: 380px;
+      padding: 6px 8px;
+      font-size: 14px;
+      font-family: monospace;
+      border: 2px inset #ccc;
+      background: #fff;
+      color: #000;
+    }
+    .search-box input[type="submit"] {
+      padding: 6px 18px;
+      font-size: 14px;
+      background: #c0c0c0;
+      color: #000;
+      border: 2px outset #fff;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 4px;
+    }
+    .search-box input[type="submit"]:active { border-style: inset; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .panel {
+      background: rgba(0,0,64,0.7);
+      border: 3px ridge #4444aa;
+      padding: 16px 20px;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+    }
+    .panel h2 {
+      margin: 0 0 12px;
+      color: #ffaa00;
+      font-family: "Times New Roman", serif;
+      font-size: 22px;
+      border-bottom: 2px solid #6666cc;
+      padding-bottom: 6px;
+      letter-spacing: 1px;
+    }
+    .panel ul { list-style: none; padding: 0; margin: 0; }
+    .panel li {
+      padding: 5px 0;
+      border-bottom: 1px dotted #334488;
+    }
+    .panel li:last-child { border-bottom: none; }
+    .panel a {
+      color: #88ccff;
+      text-decoration: underline;
+      font-size: 16px;
+    }
+    .panel a:hover {
+      color: #ffff00;
+      background: #000080;
+    }
+    .panel a:visited { color: #cc88ff; }
+    .panel .bullet { color: #ff8800; margin-right: 4px; }
+    .blink { animation: blink 1s steps(2) infinite; color: #00ff00; }
+    @keyframes blink { to { visibility: hidden; } }
+    .footer {
+      text-align: center;
+      padding: 18px 12px 28px;
+      color: #6677aa;
+      font-size: 12px;
+      border-top: 2px groove #444488;
+      margin-top: 24px;
+      font-family: "Courier New", monospace;
+    }
+    .visitor-counter {
+      display: inline-block;
+      background: #000;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      padding: 2px 8px;
+      border: 1px solid #00ff00;
+      letter-spacing: 2px;
+      margin: 0 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars-bg"></div>
+
+  <div class="header">
+    <h1>NEWGEN NAVIGATOR</h1>
+    <div class="subtitle">~ Your gateway to the World Wide Web ~</div>
+  </div>
+
+  <div class="marquee">
+    <span class="marquee-track">★ NOW ENTERING THE INFORMATION SUPERHIGHWAY ★ BEST VIEWED IN 800x600 ★ DOWNLOAD THE LATEST MULTIMEDIA PLUG-INS ★ COOL SITES UPDATED DAILY ★ PRESS CTRL+T FOR A NEW TAB ★ PRESS CTRL+D TO BOOKMARK ★ PRESS F12 FOR DEVELOPER TOOLS ★</span>
+  </div>
+
+  <div class="container">
+    <div class="search-box">
+      <label>SEARCH THE WORLD WIDE WEB</label>
+      <form action="https://duckduckgo.com/" method="get" target="_self">
+        <input type="text" name="q" placeholder="Enter your query..." autofocus>
+        <input type="submit" value="Search">
+      </form>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>★ What's Cool</h2>
+        <ul>
+          <li><span class="bullet">»</span><a href="https://en.wikipedia.org">Wikipedia: The Free Encyclopedia</a></li>
+          <li><span class="bullet">»</span><a href="https://news.ycombinator.com">Hacker News</a></li>
+          <li><span class="bullet">»</span><a href="https://www.reddit.com">Reddit</a></li>
+          <li><span class="bullet">»</span><a href="https://github.com">GitHub</a></li>
+          <li><span class="bullet">»</span><a href="https://archive.org">The Internet Archive</a></li>
+          <li><span class="bullet">»</span><a href="https://theoldnet.com">The OldNet Browser</a></li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h2>★ Net Directory</h2>
+        <ul>
+          <li><span class="bullet">»</span><a href="https://duckduckgo.com">DuckDuckGo Search</a></li>
+          <li><span class="bullet">»</span><a href="https://www.google.com">Google</a></li>
+          <li><span class="bullet">»</span><a href="https://www.youtube.com">YouTube Multimedia</a></li>
+          <li><span class="bullet">»</span><a href="https://maps.google.com">Maps &amp; Directions</a></li>
+          <li><span class="bullet">»</span><a href="https://mail.proton.me">Electronic Mail</a></li>
+          <li><span class="bullet">»</span><a href="https://www.weather.gov">Weather Forecast</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="blink">●</span>
+    Newgen Navigator v0.1 — crafted with care
+    <span class="blink">●</span>
+    <br><br>
+    visitors: <span class="visitor-counter">00000042</span>
+    last updated: <span class="visitor-counter">2026.05.06</span>
+  </div>
+</body>
+</html>

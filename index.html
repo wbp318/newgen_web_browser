@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Newgen Navigator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="menubar" id="menubar">
+    <span class="menu-item" data-menu="file"><u>F</u>ile</span>
+    <span class="menu-item" data-menu="edit"><u>E</u>dit</span>
+    <span class="menu-item" data-menu="view"><u>V</u>iew</span>
+    <span class="menu-item" data-menu="go"><u>G</u>o</span>
+    <span class="menu-item" data-menu="bookmarks"><u>B</u>ookmarks</span>
+    <span class="menu-item" data-menu="history">H<u>i</u>story</span>
+    <span class="menu-item" data-menu="window"><u>W</u>indow</span>
+    <span class="menu-item" data-menu="help"><u>H</u>elp</span>
+  </div>
+
+  <ul class="dropdown" id="menu-file">
+    <li class="dd-item" data-action="new-tab"><span>New Tab</span><span class="dd-accel">Ctrl+T</span></li>
+    <li class="dd-item" data-action="open-location"><span>Open Location...</span><span class="dd-accel">Ctrl+L</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-item" data-action="close-tab"><span>Close Tab</span><span class="dd-accel">Ctrl+W</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-item" data-action="print"><span>Print...</span><span class="dd-accel">Ctrl+P</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-item" data-action="quit"><span>Exit</span><span class="dd-accel">Alt+F4</span></li>
+  </ul>
+
+  <ul class="dropdown" id="menu-edit">
+    <li class="dd-item" data-action="cut"><span>Cut</span><span class="dd-accel">Ctrl+X</span></li>
+    <li class="dd-item" data-action="copy"><span>Copy</span><span class="dd-accel">Ctrl+C</span></li>
+    <li class="dd-item" data-action="paste"><span>Paste</span><span class="dd-accel">Ctrl+V</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-item" data-action="select-all"><span>Select All</span><span class="dd-accel">Ctrl+A</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-item" data-action="find"><span>Find in Page...</span><span class="dd-accel">Ctrl+F</span></li>
+  </ul>
+
+  <ul class="dropdown" id="menu-view">
+    <li class="dd-item" data-action="reload"><span>Reload</span><span class="dd-accel">F5</span></li>
+    <li class="dd-item" data-action="stop"><span>Stop</span><span class="dd-accel">Esc</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-item" data-action="zoom-in"><span>Zoom In</span><span class="dd-accel">Ctrl++</span></li>
+    <li class="dd-item" data-action="zoom-out"><span>Zoom Out</span><span class="dd-accel">Ctrl+-</span></li>
+    <li class="dd-item" data-action="zoom-reset"><span>Actual Size</span><span class="dd-accel">Ctrl+0</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-item" data-action="view-source"><span>Page Source</span><span class="dd-accel">Ctrl+U</span></li>
+    <li class="dd-item" data-action="dev-tools"><span>Developer Tools</span><span class="dd-accel">F12</span></li>
+  </ul>
+
+  <ul class="dropdown" id="menu-go">
+    <li class="dd-item" data-action="back"><span>Back</span><span class="dd-accel">Alt+Left</span></li>
+    <li class="dd-item" data-action="forward"><span>Forward</span><span class="dd-accel">Alt+Right</span></li>
+    <li class="dd-item" data-action="home"><span>Home</span></li>
+  </ul>
+
+  <ul class="dropdown" id="menu-bookmarks">
+    <li class="dd-item" data-action="add-bookmark"><span>Add Bookmark</span><span class="dd-accel">Ctrl+D</span></li>
+    <li class="dd-item" data-action="show-bookmarks"><span>Manage Bookmarks...</span><span class="dd-accel">Ctrl+B</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-list" id="dd-bookmarks-list"></li>
+  </ul>
+
+  <ul class="dropdown" id="menu-history">
+    <li class="dd-item" data-action="show-history"><span>Show History</span><span class="dd-accel">Ctrl+H</span></li>
+    <li class="dd-item" data-action="clear-history"><span>Clear History...</span></li>
+    <li class="dd-sep"></li>
+    <li class="dd-list" id="dd-history-list"></li>
+  </ul>
+
+  <ul class="dropdown" id="menu-window">
+    <li class="dd-item" data-action="next-tab"><span>Next Tab</span><span class="dd-accel">Ctrl+Tab</span></li>
+    <li class="dd-item" data-action="prev-tab"><span>Previous Tab</span><span class="dd-accel">Ctrl+Shift+Tab</span></li>
+  </ul>
+
+  <ul class="dropdown" id="menu-help">
+    <li class="dd-item" data-action="about"><span>About Newgen Navigator</span></li>
+  </ul>
+
+  <div class="tabstrip">
+    <div class="tabs" id="tabs"></div>
+    <button class="newtab-btn" id="newtab-btn" title="New Tab (Ctrl+T)">+</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="tb-button" id="back" disabled>
+      <span class="tb-icon">
+        <svg viewBox="0 0 22 22" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 11 L10 4 L10 8 L19 8 L19 14 L10 14 L10 18 Z"
+                fill="#28a428" stroke="#0c4a0c" stroke-width="1" stroke-linejoin="round"/>
+          <path d="M3.4 11 L10 4.4 L10 7" fill="none" stroke="#aaffaa" stroke-width="0.7"/>
+        </svg>
+      </span>
+      <span class="tb-label">Back</span>
+    </button>
+
+    <button class="tb-button" id="forward" disabled>
+      <span class="tb-icon">
+        <svg viewBox="0 0 22 22" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 11 L12 4 L12 8 L3 8 L3 14 L12 14 L12 18 Z"
+                fill="#28a428" stroke="#0c4a0c" stroke-width="1" stroke-linejoin="round"/>
+          <path d="M3.4 8.4 L12 8.4 L12 7" fill="none" stroke="#aaffaa" stroke-width="0.7"/>
+        </svg>
+      </span>
+      <span class="tb-label">Forward</span>
+    </button>
+
+    <button class="tb-button" id="reload">
+      <span class="tb-icon">
+        <svg viewBox="0 0 22 22" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 4 a7 7 0 1 1 -7 7" fill="none" stroke="#1448a0" stroke-width="2.6"/>
+          <path d="M11 1 L11 7 L17 4 Z" fill="#1448a0" stroke="#0a2a60" stroke-width="0.6"/>
+        </svg>
+      </span>
+      <span class="tb-label">Reload</span>
+    </button>
+
+    <button class="tb-button" id="home">
+      <span class="tb-icon">
+        <svg viewBox="0 0 22 22" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 11 L11 3 L20 11 L18 11 L18 19 L4 19 L4 11 Z"
+                fill="#a06030" stroke="#000" stroke-width="0.8" stroke-linejoin="round"/>
+          <rect x="14" y="5" width="2.4" height="3.4" fill="#a06030" stroke="#000" stroke-width="0.8"/>
+          <rect x="9" y="13" width="4" height="6" fill="#5a3a1a" stroke="#000" stroke-width="0.6"/>
+          <rect x="6" y="12" width="3" height="3" fill="#7ec0ee" stroke="#000" stroke-width="0.6"/>
+          <rect x="13" y="12" width="3" height="3" fill="#7ec0ee" stroke="#000" stroke-width="0.6"/>
+        </svg>
+      </span>
+      <span class="tb-label">Home</span>
+    </button>
+
+    <button class="tb-button" id="search">
+      <span class="tb-icon">
+        <svg viewBox="0 0 22 22" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="9" r="5.2" fill="#fff" stroke="#000" stroke-width="1.4"/>
+          <circle cx="9" cy="9" r="3" fill="#aacfff" opacity="0.7"/>
+          <line x1="13" y1="13" x2="19" y2="19" stroke="#503010" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="tb-label">Search</span>
+    </button>
+
+    <button class="tb-button" id="print">
+      <span class="tb-icon">
+        <svg viewBox="0 0 22 22" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="3" width="10" height="6" fill="#ffffff" stroke="#000" stroke-width="0.8"/>
+          <rect x="3" y="9" width="16" height="7" fill="#909090" stroke="#000" stroke-width="0.8"/>
+          <rect x="6" y="13" width="10" height="6" fill="#ffffff" stroke="#000" stroke-width="0.8"/>
+          <line x1="7" y1="15" x2="15" y2="15" stroke="#000" stroke-width="0.5"/>
+          <line x1="7" y1="17" x2="13" y2="17" stroke="#000" stroke-width="0.5"/>
+          <circle cx="16" cy="11.5" r="0.7" fill="#22dd22"/>
+        </svg>
+      </span>
+      <span class="tb-label">Print</span>
+    </button>
+
+    <button class="tb-button" id="stop">
+      <span class="tb-icon">
+        <svg viewBox="0 0 22 22" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="7,3 15,3 19,7 19,15 15,19 7,19 3,15 3,7"
+                   fill="#cc1010" stroke="#600404" stroke-width="0.8" stroke-linejoin="round"/>
+          <text x="11" y="13.6" text-anchor="middle" fill="white"
+                font-family="Arial, sans-serif" font-size="6" font-weight="bold" letter-spacing="0.4">STOP</text>
+        </svg>
+      </span>
+      <span class="tb-label">Stop</span>
+    </button>
+
+    <div class="spacer"></div>
+
+    <div class="throbber" id="throbber" title="Newgen Navigator">
+      <div class="star" style="--x:5px;--y:6px;--d:0s"></div>
+      <div class="star" style="--x:14px;--y:10px;--d:0.08s"></div>
+      <div class="star" style="--x:22px;--y:6px;--d:0.16s"></div>
+      <div class="star" style="--x:9px;--y:18px;--d:0.04s"></div>
+      <div class="star" style="--x:25px;--y:22px;--d:0.12s"></div>
+      <div class="star" style="--x:18px;--y:28px;--d:0.20s"></div>
+      <div class="star" style="--x:30px;--y:30px;--d:0.06s"></div>
+      <div class="star" style="--x:3px;--y:25px;--d:0.18s"></div>
+      <div class="planet"></div>
+    </div>
+  </div>
+
+  <div class="location-bar">
+    <button class="bookmark-tab" id="bookmark-tab" title="Bookmarks">
+      <span class="folder-icon">
+        <svg viewBox="0 0 14 12" width="14" height="12" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 3 L5 3 L6 4.2 L13 4.2 L13 11 L1 11 Z" fill="#e8c060" stroke="#604020" stroke-width="0.8"/>
+        </svg>
+      </span>
+      Bookmarks
+    </button>
+    <span class="loc-label">Location:</span>
+    <input class="loc-input" id="url" type="text" spellcheck="false" autocomplete="off">
+    <button class="go-btn" id="go-btn" title="Navigate">Go</button>
+  </div>
+
+  <div class="findbar" id="findbar" hidden>
+    <span class="find-label">Find:</span>
+    <input id="find-input" type="text" autocomplete="off">
+    <span class="find-count" id="find-count"></span>
+    <button id="find-prev" title="Previous (Shift+F3)">▲</button>
+    <button id="find-next" title="Next (F3)">▼</button>
+    <button id="find-close" title="Close (Esc)">×</button>
+  </div>
+
+  <div class="content" id="content"></div>
+
+  <div class="floating-panel" id="bookmarks-panel" hidden>
+    <div class="panel-titlebar">
+      <span class="panel-title">Bookmarks</span>
+      <button class="panel-close" data-panel="bookmarks-panel">×</button>
+    </div>
+    <div class="panel-body">
+      <ul class="panel-list" id="bookmarks-list"></ul>
+    </div>
+  </div>
+
+  <div class="floating-panel" id="history-panel" hidden>
+    <div class="panel-titlebar">
+      <span class="panel-title">History</span>
+      <button class="panel-close" data-panel="history-panel">×</button>
+    </div>
+    <div class="panel-body">
+      <ul class="panel-list" id="history-list"></ul>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <div class="status-icon" id="lock" title="Connection unsecured">
+      <svg viewBox="0 0 14 12" width="14" height="12" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="3" cy="6" r="2.2" fill="none" stroke="#806020" stroke-width="1.4"/>
+        <line x1="5" y1="6" x2="7.6" y2="6" stroke="#806020" stroke-width="1.4"/>
+        <line x1="9.6" y1="6" x2="11" y2="6" stroke="#806020" stroke-width="1.4"/>
+        <line x1="11" y1="6" x2="11" y2="8.5" stroke="#806020" stroke-width="1.4"/>
+        <line x1="12.6" y1="6" x2="12.6" y2="9" stroke="#806020" stroke-width="1.4"/>
+        <path d="M7.6 4.4 L8.4 6 L7.6 7.6" fill="none" stroke="#806020" stroke-width="0.8"/>
+        <path d="M9.6 4.4 L8.8 6 L9.6 7.6" fill="none" stroke="#806020" stroke-width="0.8"/>
+      </svg>
+    </div>
+    <div class="status-text" id="status">Document: Done.</div>
+    <div class="progress" id="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
