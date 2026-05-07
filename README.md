@@ -37,6 +37,7 @@ Builds are currently unsigned. On first launch:
 - **Developer tools** (F12) — full Chromium DevTools
 - **Right-click context menus** — Open in New Tab, Save Image, View Source, Inspect Element, search selection on the web
 - **Custom retro home page** with scrolling marquee, neon panels, and a totally-legit visitor counter
+- **Chrome extensions (Manifest V2)** — Tools → Extensions... or Ctrl+Shift+E loads unpacked MV2 extensions (e.g. uBlock Origin Legacy) into the browsing partition. MV3 is not supported by Electron 42
 
 ## Build from source
 
@@ -85,6 +86,7 @@ Output lands in `dist/`. Icons are regenerated from `assets/icon.svg` automatica
 | Add bookmark | Ctrl+D |
 | Open Bookmarks panel | Ctrl+B |
 | Open History panel | Ctrl+H |
+| Open Extensions panel | Ctrl+Shift+E |
 | Zoom in / out / reset | Ctrl++ / Ctrl+- / Ctrl+0 |
 | View page source | Ctrl+U |
 | Developer tools | F12 |
@@ -108,7 +110,6 @@ newgen_web_browser/
 
 ## Roadmap
 
-- Manifest V2 unpacked-extension loading with a beveled `Extensions...` manager dialog
 - Downloads bar with progress
 - Settings panel (homepage, search engine, default zoom)
 - Incognito mode (separate session partition)

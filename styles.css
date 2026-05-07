@@ -520,6 +520,102 @@ webview.active { display: inline-flex; flex: 1; }
 }
 .panel-empty:hover { background: transparent !important; }
 
+/* Extensions panel ----------------------------------------- */
+.ext-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 8px;
+  border-bottom: 1px solid var(--shadow);
+  margin-bottom: 4px;
+}
+.ext-btn {
+  background: var(--face);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 2px 12px;
+  border-top: 1px solid var(--hl);
+  border-left: 1px solid var(--hl);
+  border-right: 1px solid var(--shadow);
+  border-bottom: 1px solid var(--shadow);
+  box-shadow: inset -1px -1px 0 var(--dk-shadow), inset 1px 1px 0 var(--lt-hl);
+  cursor: default;
+  min-height: 22px;
+}
+.ext-btn:active {
+  border-top: 1px solid var(--shadow);
+  border-left: 1px solid var(--shadow);
+  border-right: 1px solid var(--hl);
+  border-bottom: 1px solid var(--hl);
+  box-shadow: inset 1px 1px 0 var(--dk-shadow);
+}
+.ext-help {
+  color: var(--shadow);
+  font-size: 11px;
+  cursor: help;
+  user-select: none;
+}
+.ext-status {
+  margin: 4px 4px 8px;
+  padding: 4px 6px;
+  background: #ffffe0;
+  border: 1px solid var(--shadow);
+  font-size: 11px;
+  color: var(--ink);
+}
+.ext-status.error {
+  background: #ffe0e0;
+  border-color: #a04040;
+}
+.ext-list .ext-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  border-bottom: 1px dotted var(--shadow);
+}
+.ext-list .ext-item:last-child { border-bottom: none; }
+.ext-list .ext-name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ext-list .ext-title {
+  font-weight: bold;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ext-list .ext-meta {
+  font-size: 10px;
+  color: var(--shadow);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ext-list .ext-version {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  color: var(--shadow);
+  white-space: nowrap;
+}
+.ext-empty {
+  text-align: center;
+  font-style: italic;
+  color: var(--shadow);
+  padding: 16px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.ext-empty a {
+  color: #0000a0;
+  text-decoration: underline;
+  font-style: normal;
+}
+
 /* Statusbar ------------------------------------------------ */
 .statusbar {
   display: flex;

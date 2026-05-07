@@ -28,6 +28,11 @@ const ddBookmarks   = $('dd-bookmarks-list');
 const ddHistory     = $('dd-history-list');
 const bookmarksPanel = $('bookmarks-panel');
 const historyPanel   = $('history-panel');
+const extensionsPanel = $('extensions-panel');
+const extensionsList  = $('extensions-list');
+const extensionsEmpty = $('ext-empty');
+const extLoadBtn      = $('ext-load-btn');
+const extStatus       = $('ext-status');
 const bookmarkTab    = $('bookmark-tab');
 const omniboxEl      = $('omnibox-suggestions');
 
@@ -82,6 +87,63 @@ const history = {
     renderHistory();
   },
   clear() { this.items = []; persist('history', this.items); renderHistory(); },
+};
+
+/* ===== Extensions (MV2 unpacked, loaded via IPC into persist:newgen) ===== */
+const extensions = {
+  async open() {
+    extensionsPanel.hidden = false;
+    extStatus.hidden = true;
+    await this.refresh();
+  },
+  async refresh() {
+    const items = await window.newgen?.extensions.list();
+    this._render(items || []);
+  },
+  async loadUnpacked() {
+    extStatus.hidden = true;
+    const result = await window.newgen?.extensions.loadUnpacked();
+    if (!result || result.canceled) return;
+    if (result.error) {
+      this._setStatus(result.error, true);
+      return;
+    }
+    this._setStatus(`Loaded "${result.name}" v${result.version}.`, false);
+    await this.refresh();
+  },
+  async remove(extPath, name) {
+    if (!confirm(`Remove "${name}"?\nThe extension folder is not deleted; only the registration is removed.`)) return;
+    const items = await window.newgen?.extensions.remove(extPath);
+    this._setStatus(`Removed "${name}".`, false);
+    this._render(items || []);
+  },
+  _setStatus(text, isError) {
+    extStatus.textContent = text;
+    extStatus.classList.toggle('error', !!isError);
+    extStatus.hidden = false;
+  },
+  _render(items) {
+    extensionsList.innerHTML = '';
+    extensionsEmpty.hidden = items.length > 0;
+    for (const ext of items) {
+      const li = document.createElement('li');
+      li.className = 'ext-item';
+      li.innerHTML = `
+        <div class="ext-name">
+          <span class="ext-title"></span>
+          <span class="ext-meta"></span>
+        </div>
+        <span class="ext-version"></span>
+        <button class="item-del" title="Remove">×</button>
+      `;
+      li.querySelector('.ext-title').textContent = ext.name;
+      li.querySelector('.ext-meta').textContent = ext.path;
+      li.querySelector('.ext-meta').title = ext.path;
+      li.querySelector('.ext-version').textContent = ext.version ? `v${ext.version}` : '';
+      li.querySelector('.item-del').addEventListener('click', () => this.remove(ext.path, ext.name));
+      extensionsList.appendChild(li);
+    }
+  },
 };
 
 /* ===== Closed tabs stack ===== */
@@ -738,6 +800,7 @@ const actions = {
   'add-bookmark':  () => { const t = tabs.current(); if (t) bookmarks.add(t.url, t.title); },
   'show-bookmarks':() => { bookmarksPanel.hidden = false; },
   'show-history':  () => { historyPanel.hidden = false; },
+  'show-extensions': () => extensions.open(),
   'clear-history': () => { if (confirm('Clear all browsing history?')) history.clear(); },
   'next-tab':      () => tabs.next(),
   'prev-tab':      () => tabs.prev(),
@@ -763,6 +826,16 @@ goBtn.addEventListener('click',    () => navigate(urlInput.value));
 newTabBtn.addEventListener('click',() => tabs.create(HOME_URL));
 bookmarkTab.addEventListener('click', () => {
   bookmarksPanel.hidden = !bookmarksPanel.hidden;
+});
+extLoadBtn.addEventListener('click', () => extensions.loadUnpacked());
+
+// Anchors inside chrome panels (e.g. the Extensions empty-state link) must
+// open as a new tab — not navigate the BrowserWindow that hosts the chrome.
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href^="http"]');
+  if (!a || !a.closest('.floating-panel')) return;
+  e.preventDefault();
+  tabs.create(a.href);
 });
 
 /* ===== URL input (with omnibox) ===== */

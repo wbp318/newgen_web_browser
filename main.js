@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, Menu, clipboard, ipcMain, protocol, session } = require('electron');
+const { app, BrowserWindow, shell, Menu, clipboard, ipcMain, protocol, session, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
@@ -30,6 +30,103 @@ function renderInternalPage(slug) {
     (out, [token, value]) => out.split(token).join(value),
     html
   );
+}
+
+/* ===== Chrome extensions (Manifest V2 unpacked only — see CLAUDE.md) ===== */
+// Registry layout: { [absolutePath]: { enabled: bool, name?: string, version?: string } }
+// Lives at <userData>/extensions.json so it survives uninstall/reinstall.
+
+const browsingSession = () => session.fromPartition('persist:newgen');
+const liveExtensions = new Map(); // absolutePath -> Electron Extension object
+
+function extensionsRegistryPath() {
+  return path.join(app.getPath('userData'), 'extensions.json');
+}
+
+function readExtensionsRegistry() {
+  try { return JSON.parse(fs.readFileSync(extensionsRegistryPath(), 'utf8')); }
+  catch { return {}; }
+}
+
+function writeExtensionsRegistry(registry) {
+  const file = extensionsRegistryPath();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(registry, null, 2));
+}
+
+// Electron 42 moved the extension API onto `session.extensions`; the older
+// `session.loadExtension` / `session.removeExtension` shortcuts emit deprecation
+// warnings on every call. Falling back to the legacy method keeps us working on
+// older Electron lines if we ever pin back.
+const sessionExtensions = (sess) => sess.extensions || sess;
+
+async function loadExtensionsAtStartup() {
+  const registry = readExtensionsRegistry();
+  const ext = sessionExtensions(browsingSession());
+  for (const [extPath, meta] of Object.entries(registry)) {
+    if (!meta?.enabled) continue;
+    if (!fs.existsSync(extPath)) continue;
+    try {
+      const loaded = await ext.loadExtension(extPath, { allowFileAccess: false });
+      liveExtensions.set(extPath, loaded);
+      registry[extPath] = { enabled: true, name: loaded.name, version: loaded.version };
+    } catch (err) {
+      console.error('[extensions] failed to load', extPath, err.message);
+    }
+  }
+  writeExtensionsRegistry(registry);
+}
+
+function listExtensions() {
+  const registry = readExtensionsRegistry();
+  return Object.entries(registry).map(([extPath, meta]) => {
+    const live = liveExtensions.get(extPath);
+    return {
+      path: extPath,
+      enabled: !!meta.enabled,
+      loaded: !!live,
+      name: live?.name || meta.name || path.basename(extPath),
+      version: live?.version || meta.version || '',
+      id: live?.id || null,
+    };
+  });
+}
+
+async function loadUnpackedExtension() {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Load Unpacked Extension',
+    buttonLabel: 'Load',
+    properties: ['openDirectory'],
+  });
+  if (result.canceled || !result.filePaths?.length) return { canceled: true };
+  const extPath = result.filePaths[0];
+
+  if (liveExtensions.has(extPath)) {
+    return { error: 'Extension already loaded from this path.' };
+  }
+
+  try {
+    const ext = sessionExtensions(browsingSession());
+    const loaded = await ext.loadExtension(extPath, { allowFileAccess: false });
+    liveExtensions.set(extPath, loaded);
+    const registry = readExtensionsRegistry();
+    registry[extPath] = { enabled: true, name: loaded.name, version: loaded.version };
+    writeExtensionsRegistry(registry);
+    return { ok: true, name: loaded.name, version: loaded.version };
+  } catch (err) {
+    return { error: err.message || String(err) };
+  }
+}
+
+function removeExtension(extPath) {
+  const live = liveExtensions.get(extPath);
+  if (live) {
+    try { sessionExtensions(browsingSession()).removeExtension(live.id); } catch {}
+    liveExtensions.delete(extPath);
+  }
+  const registry = readExtensionsRegistry();
+  delete registry[extPath];
+  writeExtensionsRegistry(registry);
 }
 
 function sendAction(name, ...args) {
@@ -128,6 +225,12 @@ function buildAppMenu() {
       label: 'History',
       submenu: [
         { label: 'Show History', accelerator: 'CmdOrCtrl+H', click: () => sendAction('show-history') },
+      ],
+    },
+    {
+      label: 'Tools',
+      submenu: [
+        { label: 'Extensions...', accelerator: 'CmdOrCtrl+Shift+E', click: () => sendAction('show-extensions') },
       ],
     },
     {
@@ -235,7 +338,7 @@ function newgenProtocolHandler(request) {
   return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Register the handler on the default session (for the chrome window) and on
   // the webview partition session (for tabs). Custom protocols are per-session;
   // registering only the default session leaves tabs without a handler.
@@ -243,6 +346,12 @@ app.whenReady().then(() => {
   session.fromPartition('persist:newgen').protocol.handle('newgen', newgenProtocolHandler);
 
   ipcMain.handle('fetch-suggestions', (_e, q) => fetchSuggestions(q));
+  ipcMain.handle('extensions:list',          ()    => listExtensions());
+  ipcMain.handle('extensions:load-unpacked', ()    => loadUnpackedExtension());
+  ipcMain.handle('extensions:remove',        (_e, p) => { removeExtension(p); return listExtensions(); });
+
+  await loadExtensionsAtStartup();
+
   Menu.setApplicationMenu(buildAppMenu());
   mainWindow = createWindow();
 });

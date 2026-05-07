@@ -231,6 +231,26 @@
     </div>
   </div>
 
+  <div class="floating-panel" id="extensions-panel" hidden>
+    <div class="panel-titlebar">
+      <span class="panel-title">Extensions</span>
+      <button class="panel-close" data-panel="extensions-panel">×</button>
+    </div>
+    <div class="panel-body">
+      <div class="ext-toolbar">
+        <button id="ext-load-btn" class="ext-btn">Load Unpacked...</button>
+        <span class="ext-help" title="Load an unpacked Chrome extension from a folder. Manifest V2 only — Electron does not support MV3.">(?)</span>
+      </div>
+      <div class="ext-status" id="ext-status" hidden></div>
+      <ul class="panel-list ext-list" id="extensions-list"></ul>
+      <div class="ext-empty" id="ext-empty">
+        No extensions loaded.<br><br>
+        Manifest V2 unpacked extensions only.<br>
+        For example: <a href="https://github.com/gorhill/uBlock-for-firefox-legacy/releases" data-action="open-external">uBlock Origin Legacy</a>.
+      </div>
+    </div>
+  </div>
+
   <div class="statusbar">
     <div class="status-icon" id="lock" title="Connection unsecured">
       <svg viewBox="0 0 14 12" width="14" height="12" xmlns="http://www.w3.org/2000/svg">

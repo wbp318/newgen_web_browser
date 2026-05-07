@@ -75,3 +75,11 @@ The product is named **Newgen Navigator**. Don't reintroduce the Netscape name, 
 - Default search engine is Google; it's a plain query URL (`https://www.google.com/search?q=`) — no API key needed. The suggestions endpoint (`/complete/search?client=firefox`) is also unauthenticated and returns clean JSON `["query", ["sugg1", "sugg2", ...]]`.
 - The `newgen://` scheme is registered as **standard + secure + supportFetchAPI** before `app.whenReady()`, then handled inside `app.whenReady()` via `protocol.handle()`. Adding a new internal page (e.g. `newgen://about`) is a one-liner: register the slug in `NEWGEN_PAGES` and drop the corresponding HTML file at the project root.
 - New tabs open `newgen://home/` (the trailing slash matters — Electron normalises the URL that way and `renderer.js` does exact-string comparisons against `HOME_URL`).
+
+### Extensions (Manifest V2 unpacked)
+
+- Loaded into the **`persist:newgen` partition session**, not the default session, so they apply to webview tabs (where the user actually browses) and not the chrome itself. `session.fromPartition('persist:newgen').loadExtension(absPath, { allowFileAccess: false })`.
+- Persisted in `<userData>/extensions.json` as `{ [absolutePath]: { enabled, name, version } }`. Re-loaded on app start; missing paths are skipped silently.
+- IPC surface lives on `window.newgen.extensions` (preload bridge): `list()`, `loadUnpacked()` (opens a folder picker via `dialog.showOpenDialog` in main), `remove(path)`. The renderer's `extensions` object in `renderer.js` drives the `#extensions-panel` floating panel.
+- **Manifest V3 is not supported by Electron 42** (service-worker background scripts in particular). Loading an MV3 extension throws a manifest error from `loadExtension`; the dialog shows it. Browser-action toolbar UI is not wired — extensions run, but their popup buttons have no host slot in our chrome.
+- To extend: add a slug to `NEWGEN_PAGES` for an `Extensions` settings page if needed; wire an extension into the chrome (e.g. browser-action icons) via the `Extension` object returned by `loadExtension`, which exposes `manifest`, `id`, `path`.

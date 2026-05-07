@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "Newgen Test Extension",
+  "version": "0.1.0",
+  "description": "Tiny MV2 sanity-check extension that proves Newgen can load and run unpacked extensions. Injects a Win95-styled badge into the bottom-right corner of every page.",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
