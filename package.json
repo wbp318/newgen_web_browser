@@ -29,12 +29,11 @@
   "scripts": {
     "start": "electron .",
     "build:icons": "node tools/build-icons.js",
-    "predist": "node tools/build-icons.js",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac",
-    "dist:linux": "electron-builder --linux"
+    "pack": "npm run build:icons && electron-builder --dir",
+    "dist": "npm run build:icons && electron-builder",
+    "dist:win": "npm run build:icons && electron-builder --win",
+    "dist:mac": "npm run build:icons && electron-builder --mac",
+    "dist:linux": "npm run build:icons && electron-builder --linux"
   },
   "devDependencies": {
     "electron": "^42.0.0",
