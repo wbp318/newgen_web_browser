@@ -29,11 +29,16 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        # Using `npm install` rather than `npm ci` because npm doesn't apply the
+        # package.json `overrides` block when validating the lockfile under
+        # `ci`, so it reports phantom mismatches for keys we're deliberately
+        # redirecting (rimraf@2 -> rimraf@6, etc.). `install` resolves overrides
+        # correctly. We trade strict-lockfile reproducibility for working CI.
+        run: npm install --no-audit --no-fund
 
       - name: Build installers
         run: npm run ${{ matrix.script }}
