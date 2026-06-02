@@ -1,0 +1,13 @@
+# Keep SHA-pinned GitHub Actions current. Dependabot bumps the commit SHA AND the
+# trailing version comment together, opening a reviewable weekly (grouped) PR.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        patterns: ["*"]
